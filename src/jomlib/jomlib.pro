@@ -2,12 +2,19 @@ TEMPLATE = lib
 TARGET = jomlib
 DESTDIR = ../../lib
 QT = core
-CONFIG += qt staticlib debug_and_release build_all
+CONFIG += qt staticlib
+# XD builds one variant per build directory, hence one library, with no
+# debug suffix.
+isXD {
+    CONFIG -= debug_and_release build_all
+} else {
+    CONFIG += debug_and_release build_all
+}
 DEFINES += _CRT_SECURE_NO_WARNINGS
 DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
 PRECOMPILED_HEADER = stable.h
 
-build_pass:CONFIG(debug, debug|release) {
+!isXD:build_pass:CONFIG(debug, debug|release) {
     TARGET = $$join(TARGET,,,d)
 }
 

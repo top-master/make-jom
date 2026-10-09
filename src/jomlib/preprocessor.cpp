@@ -139,10 +139,10 @@ QString Preprocessor::currentFileName() const
 MakefileLine Preprocessor::basicReadLine()
 {
     if (!m_linesPutBack.isEmpty())
-        return { m_linesPutBack.takeFirst() };
+        return MakefileLine(m_linesPutBack.takeFirst());
 
     if (m_fileStack.isEmpty())
-        return {};
+        return MakefileLine();
 
     MakefileLine line = m_fileStack.top().reader->readLine(m_bInlineFileMode);
     while (line.content.isNull()) {

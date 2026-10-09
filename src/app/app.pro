@@ -4,7 +4,11 @@ QT = core
 CONFIG += console
 DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
 TARGET = jom
-CONFIG(debug, debug|release) {
+# XD builds one variant per build directory, hence `jom.exe` in both, which
+# `build.sh --run` and the tests find by that name.
+isXD {
+    CONFIG -= debug_and_release
+} else:CONFIG(debug, debug|release) {
     TARGET = $$join(TARGET,,,d)
 }
 
@@ -37,3 +41,6 @@ rcsubst.input = $$OUT_PWD/jom.rc.in
 rcsubst.output = $$OUT_PWD/jom.rc
 QMAKE_SUBSTITUTES += rcsubst
 RC_FILE += $$OUT_PWD/jom.rc
+
+# Puts XD's Qt libraries beside `jom.exe`, which needs them to start.
+isXD:!qt_static: copyModuleList($$clean_path($$OUT_PWD/$$DESTDIR))

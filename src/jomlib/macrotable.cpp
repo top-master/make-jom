@@ -96,7 +96,7 @@ void MacroTable::defineImplicitCommandLineMacroValue(const QString &name, const 
 }
 
 void MacroTable::defineCommandLineMacroValueImpl(const QString &name, const QString &value,
-                                                 MacroSource source)
+                                                 MacroSource::Value source)
 {
     MacroData* macroData = internalSetMacroValue(name, value, true);
     if (!macroData)
@@ -128,7 +128,7 @@ void MacroTable::setMacroValue(const QString& name, const QString& value)
     setMacroValueImpl(name, value, MacroSource::MakeFile);
 }
 
-void MacroTable::setMacroValueImpl(const QString &name, const QString &value, MacroSource source)
+void MacroTable::setMacroValueImpl(const QString &name, const QString &value, MacroSource::Value source)
 {
     MacroData* macroData = internalSetMacroValue(name, value);
     if (!macroData) {

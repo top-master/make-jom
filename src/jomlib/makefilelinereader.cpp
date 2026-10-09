@@ -92,7 +92,7 @@ MakefileLine MakefileLineReader::readLine(bool bInlineFileMode)
 {
     if (bInlineFileMode) {
         m_nLineNumber++;
-        return MakefileLine{ QString::fromLatin1(m_file.readLine()) };
+        return MakefileLine(QString::fromLatin1(m_file.readLine()));
     }
 
     return (this->*m_readLineImpl)();
@@ -108,7 +108,7 @@ MakefileLine MakefileLineReader::readLine_impl_local8bit()
         m_nLineNumber++;
         const qint64 n = m_file.readLine(m_lineBuffer, m_nLineBufferSize - 1);
         if (n <= 0)
-            return {};
+            return MakefileLine();
 
         bytesRead = n;
         while (m_lineBuffer[bytesRead - 1] != '\n') {

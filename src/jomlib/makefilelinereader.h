@@ -31,17 +31,31 @@
 
 namespace NMakeFile {
 
-enum class LineContinuationType
+struct LineContinuationType
 {
-    None,
-    Backslash,
-    Caret
+    enum Value
+    {
+        None,
+        Backslash,
+        Caret
+    };
 };
 
 struct MakefileLine
 {
+    MakefileLine()
+        : continuation(LineContinuationType::None)
+    {
+    }
+
+    explicit MakefileLine(const QString &content)
+        : content(content)
+        , continuation(LineContinuationType::None)
+    {
+    }
+
     QString content;
-    LineContinuationType continuation = LineContinuationType::None;
+    LineContinuationType::Value continuation;
 };
 
 inline bool isComplete(const MakefileLine &line)

@@ -8,11 +8,15 @@ win32-g++ {
     JOMLIB_SUFFIX = lib
 }
 
-build_pass:CONFIG(debug, debug|release) {
-    JOMLIB = $$PROJECT_BUILD_ROOT/lib/$${JOMLIB_PREFIX}jomlibd.$$JOMLIB_SUFFIX
-}
-build_pass:CONFIG(release, debug|release) {
+isXD {
     JOMLIB = $$PROJECT_BUILD_ROOT/lib/$${JOMLIB_PREFIX}jomlib.$$JOMLIB_SUFFIX
+} else {
+    build_pass:CONFIG(debug, debug|release) {
+        JOMLIB = $$PROJECT_BUILD_ROOT/lib/$${JOMLIB_PREFIX}jomlibd.$$JOMLIB_SUFFIX
+    }
+    build_pass:CONFIG(release, debug|release) {
+        JOMLIB = $$PROJECT_BUILD_ROOT/lib/$${JOMLIB_PREFIX}jomlib.$$JOMLIB_SUFFIX
+    }
 }
 
 LIBS += $$JOMLIB
