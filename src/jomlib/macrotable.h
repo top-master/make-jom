@@ -70,25 +70,34 @@ public:
     static void applySubstitution(const Substitution &substitution, QString &value);
 
 private:
-    enum class MacroSource
+    struct MacroSource
     {
-        CommandLine,
-        CommandLineImplicit,
-        MakeFile,
-        Environment,
-        Predefinition
+        enum Value
+        {
+            CommandLine,
+            CommandLineImplicit,
+            MakeFile,
+            Environment,
+            Predefinition
+        };
     };
 
     struct MacroData
     {
-        MacroSource source = MacroSource::MakeFile;
-        bool isReadOnly = false;
+        MacroData()
+            : source(MacroSource::MakeFile)
+            , isReadOnly(false)
+        {
+        }
+
+        MacroSource::Value source;
+        bool isReadOnly;
         QString value;
     };
 
-    void setMacroValueImpl(const QString &name, const QString &value, MacroSource source);
+    void setMacroValueImpl(const QString &name, const QString &value, MacroSource::Value source);
     void defineCommandLineMacroValueImpl(const QString &name, const QString &value,
-                                         MacroSource source);
+                                         MacroSource::Value source);
     MacroData* internalSetMacroValue(const QString &name, const QString &value,
                                      bool ignoreReadOnly = false);
     void setEnvironmentVariable(const QString& name, const QString& value);

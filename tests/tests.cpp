@@ -936,10 +936,15 @@ void Tests::windowsPathsInTargetName()
 bool Tests::runJom(const QStringList &args, const QString &workingDirectory,
                    QProcess::ProcessChannelMode channelMode)
 {
+    // A debug build names jom `jomd.exe`, unless it is built with XD, which
+    // keeps `jom.exe` in each variant's own build directory.
 #ifdef _DEBUG
-    const QLatin1String jomBinaryName("jomd.exe");
+    QString jomBinaryName = QLatin1String("jomd.exe");
+    if (!QFile::exists(QCoreApplication::applicationDirPath() + "/" + jomBinaryName)) {
+        jomBinaryName = QLatin1String("jom.exe");
+    }
 #else
-    const QLatin1String jomBinaryName("jom.exe");
+    const QString jomBinaryName = QLatin1String("jom.exe");
 #endif
     QString jomBinary = QFileInfo(QCoreApplication::applicationDirPath() + "/" + jomBinaryName).absoluteFilePath();
     if (!QFile::exists(jomBinary)) {
@@ -1233,7 +1238,19 @@ void Tests::suffixes()
     QCOMPARE(output.takeFirst(), QByteArray("c -> x"));
 }
 
-using ByteArrayDict = QHash<QByteArray, QByteArray>;
+typedef QHash<QByteArray, QByteArray> ByteArrayDict;
+
+/*!
+    Builds the macro values the `macrosOnCommandLine` makefile prints: those
+    of `FooBar` and of `FOOBAR`.
+*/
+static ByteArrayDict fooBarMacros(const char *fooBar, const char *upperFooBar)
+{
+    ByteArrayDict macros;
+    macros.insert("FooBar", fooBar);
+    macros.insert("FOOBAR", upperFooBar);
+    return macros;
+}
 
 void Tests::macrosOnCommandLine_data()
 {
@@ -1241,43 +1258,43 @@ void Tests::macrosOnCommandLine_data()
     QTest::addColumn<ByteArrayDict>("expectedMacros");
     QTest::newRow("no_arguments")
             << QStringList()
-            << ByteArrayDict{ { "FooBar", "1" }, { "FOOBAR", "" } };
+            << fooBarMacros("1", "");
     QTest::newRow("FooBar")
-            << QStringList{ "FooBar=2" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "2" } };
+            << (QStringList() << "FooBar=2")
+            << fooBarMacros("2", "2");
     QTest::newRow("FOOBAR")
-            << QStringList{ "FOOBAR=2" }
-            << ByteArrayDict{ { "FooBar", "1" }, { "FOOBAR", "2" } };
+            << (QStringList() << "FOOBAR=2")
+            << fooBarMacros("1", "2");
     QTest::newRow("foobar")
-            << QStringList{ "foobar=2" }
-            << ByteArrayDict{ { "FooBar", "1" }, { "FOOBAR", "2" } };
+            << (QStringList() << "foobar=2")
+            << fooBarMacros("1", "2");
     QTest::newRow("FooBar_FOOBAR")
-            << QStringList{ "FooBar=2", "FOOBAR=3" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "3" } };
+            << (QStringList() << "FooBar=2" << "FOOBAR=3")
+            << fooBarMacros("2", "3");
     QTest::newRow("FOOBAR_FooBar")
-            << QStringList{ "FOOBAR=2", "FooBar=3" }
-            << ByteArrayDict{ { "FooBar", "3" }, { "FOOBAR", "2" } };
+            << (QStringList() << "FOOBAR=2" << "FooBar=3")
+            << fooBarMacros("3", "2");
     QTest::newRow("FooBar_FOOBAR_foobar")
-            << QStringList{ "FooBar=2", "FOOBAR=3", "foobar=4" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "3" } };
+            << (QStringList() << "FooBar=2" << "FOOBAR=3" << "foobar=4")
+            << fooBarMacros("2", "3");
     QTest::newRow("foobar_FooBar_FOOBAR")
-            << QStringList{ "foobar=2", "FooBar=3", "FOOBAR=4" }
-            << ByteArrayDict{ { "FooBar", "3" }, { "FOOBAR", "4" } };
+            << (QStringList() << "foobar=2" << "FooBar=3" << "FOOBAR=4")
+            << fooBarMacros("3", "4");
     QTest::newRow("FooBar_FooBar")
-            << QStringList{ "FooBar=2", "FooBar=3" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "3" } };
+            << (QStringList() << "FooBar=2" << "FooBar=3")
+            << fooBarMacros("2", "3");
     QTest::newRow("FooBar_FooBar_FooBar")
-            << QStringList{ "FooBar=2", "FooBar=3", "FooBar=4" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "4" } };
+            << (QStringList() << "FooBar=2" << "FooBar=3" << "FooBar=4")
+            << fooBarMacros("2", "4");
     QTest::newRow("FOOBAR_FOOBAR")
-            << QStringList{ "FOOBAR=2", "FOOBAR=3" }
-            << ByteArrayDict{ { "FooBar", "1" }, { "FOOBAR", "2" } };
+            << (QStringList() << "FOOBAR=2" << "FOOBAR=3")
+            << fooBarMacros("1", "2");
     QTest::newRow("FOOBAR_FOOBAR_FOOBAR")
-            << QStringList{ "FOOBAR=2", "FOOBAR=3", "FOOBAR=4" }
-            << ByteArrayDict{ { "FooBar", "1" }, { "FOOBAR", "2" } };
+            << (QStringList() << "FOOBAR=2" << "FOOBAR=3" << "FOOBAR=4")
+            << fooBarMacros("1", "2");
     QTest::newRow("FooBar_FooBar_FOOBAR_FOOBAR")
-            << QStringList{ "FooBar=2", "FooBar=3", "FOOBAR=4", "FOOBAR=5" }
-            << ByteArrayDict{ { "FooBar", "2" }, { "FOOBAR", "4" } };
+            << (QStringList() << "FooBar=2" << "FooBar=3" << "FOOBAR=4" << "FOOBAR=5")
+            << fooBarMacros("2", "4");
 }
 
 void Tests::macrosOnCommandLine()
@@ -1293,8 +1310,8 @@ void Tests::macrosOnCommandLine()
     if (it != output.end())
         output.erase(it, output.end());
     ByteArrayDict macros;
-    for (const QByteArray &line : qAsConst(output)) {
-        auto x = line.split(':');
+    foreach (const QByteArray &line, output) {
+        QList<QByteArray> x = line.split(':');
         macros[x.at(0)] = x.at(1);
     }
     if (macros != expectedMacros) {

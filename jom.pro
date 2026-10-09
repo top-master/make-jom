@@ -4,7 +4,11 @@ sub_app.subdir = src/app
 sub_app.depends = sub_jomlib
 sub_tests.subdir = tests
 sub_tests.depends = sub_jomlib sub_app
-SUBDIRS = sub_app sub_jomlib sub_tests
+SUBDIRS = sub_app sub_jomlib
+
+# Built with XD, the tests are a project of their own that `build.sh --test`
+# builds and runs; elsewhere they build with the rest.
+!isXD: SUBDIRS += sub_tests
 
 OTHER_FILES = \
     changelog.txt \

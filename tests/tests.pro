@@ -3,7 +3,14 @@ QT = core testlib
 CONFIG += testcase
 INCLUDEPATH += ../src/jomlib
 
-CONFIG(debug, debug|release) {
+isXD {
+    # `build.sh --test` runs `<app>-test-runner` from the app's `bin`
+    # folder, where the tests also find `jom.exe`.
+    CONFIG -= debug_and_release
+    TARGET = jom-test-runner
+    DESTDIR = ../bin
+    !qt_static: copyModuleList($$clean_path($$OUT_PWD/$$DESTDIR))
+} else:CONFIG(debug, debug|release) {
     TARGET = testsd
 } else {
     TARGET = tests

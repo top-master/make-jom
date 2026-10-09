@@ -3,6 +3,22 @@
 jom is a parallel make tool for Windows. It is an nmake clone with
 support for parallel builds.
 
+## Building with XD
+
+`build.sh` builds jom against the XD framework, Visual Studio 2010 or newer
+included. Run it from Git Bash, in a Visual Studio developer prompt
+(`vcvarsall.bat`):
+
+```sh
+./build.sh            # debug build, in ../build/jom-debug
+./build.sh --release  # release build, in ../build/jom-release
+./build.sh --test     # build, then run the tests
+```
+
+It looks for XD in `$XD_ROOT`, then in a sibling `XD5` or `XD` folder (any
+letter case), and offers to clone it when none is found. `jom.exe` and the
+Qt libraries it needs end up in the build folder's `bin`.
+
 ## Building with QMake
 
 ```bat
